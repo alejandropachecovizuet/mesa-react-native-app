@@ -1,0 +1,50 @@
+import React, { Component } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { connect } from 'react-redux';
+import { autenticacion } from './Store/Servicios/Firebase'; 
+import { RutasNoAutenticadas } from "./Componentes/NoAutenticados/RutasNoAutenticadas";
+import { actionEstablecerSesion, actionCerrarSesion } from "./Store/ACCIONES";
+import { RutasAutenticadas } from "./Componentes/Autenticados/RutasAutenticadas";
+
+class Seleccion extends Component {
+  componentDidMount(){
+      this.props.autenticacion();
+  }
+  render() {
+    return (
+      <View style={styles.container}>
+        {this.props.usuario? <RutasAutenticadas/>: <RutasNoAutenticadas/>}  
+              
+      </View>
+    );
+  }
+}
+
+// define your styles
+const styles = StyleSheet.create({  
+  container: {
+    flex: 1,
+  },
+});
+
+
+const mapStateToProps = state => ({
+    usuario: state.reducerSesion, 
+  });
+  
+  const mapDispatchToProps = dispatch => ({  
+    autenticacion: (datos) => {
+      autenticacion.onAuthStateChanged(function(usuario) {
+            if (usuario) {
+              console.log("usuario:" + autenticacion.currentUser.toJSON); 
+              dispatch(actionEstablecerSesion(usuario));
+            } else {
+              console.log('No existe session')
+              dispatch(actionCerrarSesion());
+            }
+          });
+    },
+  });
+  
+
+export default connect(mapStateToProps, mapDispatchToProps)(Seleccion);
